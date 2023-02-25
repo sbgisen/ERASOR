@@ -55,8 +55,8 @@ namespace erasor_utils {
     }
 
     void parse_dynamic_obj(
-            const pcl::PointCloud<pcl::PointXYZI> &cloudIn, pcl::PointCloud<pcl::PointXYZI> &dynamicOut,
-            pcl::PointCloud<pcl::PointXYZI> &staticOut) {
+            const pcl::PointCloud<PointType> &cloudIn, pcl::PointCloud<PointType> &dynamicOut,
+            pcl::PointCloud<PointType> &staticOut) {
         dynamicOut.points.clear();
         staticOut.points.clear();
 
@@ -77,21 +77,21 @@ namespace erasor_utils {
         }
     }
 
-    void voxelize_preserving_labels(pcl::PointCloud<pcl::PointXYZI>::Ptr src, pcl::PointCloud<pcl::PointXYZI> &dst, double leaf_size) {
+    void voxelize_preserving_labels(pcl::PointCloud<PointType>::Ptr src, pcl::PointCloud<PointType> &dst, double leaf_size) {
         /**< IMPORTANT
          * Because PCL voxlizaiton just does average the intensity of point cloud,
          * so this function is to conduct voxelization followed by nearest points search to re-assign the label of each point */
-        pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_voxelized(new pcl::PointCloud<pcl::PointXYZI>);
-        pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_reassigned(new pcl::PointCloud<pcl::PointXYZI>);
+        pcl::PointCloud<PointType>::Ptr ptr_voxelized(new pcl::PointCloud<PointType>);
+        pcl::PointCloud<PointType>::Ptr ptr_reassigned(new pcl::PointCloud<PointType>);
 
         // 1. Voxelization
-        static pcl::VoxelGrid<pcl::PointXYZI> voxel_filter;
+        static pcl::VoxelGrid<PointType> voxel_filter;
         voxel_filter.setInputCloud(src);
         voxel_filter.setLeafSize(leaf_size, leaf_size, leaf_size);
         voxel_filter.filter(*ptr_voxelized);
 
         // 2. Find nearest point to update intensity (index and id)
-        pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+        pcl::KdTreeFLANN<PointType> kdtree;
         kdtree.setInputCloud(src);
 
         ptr_reassigned->points.reserve(ptr_voxelized->points.size());
@@ -113,7 +113,7 @@ namespace erasor_utils {
         dst = *ptr_reassigned;
     }
 
-    void count_stat_dyn(const pcl::PointCloud<pcl::PointXYZI> &cloudIn, int &num_static, int &num_dynamic) {
+    void count_stat_dyn(const pcl::PointCloud<PointType> &cloudIn, int &num_static, int &num_dynamic) {
         int             tmp_static  = 0;
         int             tmp_dynamic = 0;
         for (const auto &pt: cloudIn.points) {

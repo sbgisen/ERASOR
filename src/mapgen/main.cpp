@@ -52,8 +52,8 @@ void callbackData(const node msg) {
 
     // Visualization
     if ((cnt % viz_interval) == 0){
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCurr(new pcl::PointCloud<pcl::PointXYZI>());
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudMap(new pcl::PointCloud<pcl::PointXYZI>());
+        pcl::PointCloud<PointType>::Ptr cloudCurr(new pcl::PointCloud<PointType>());
+        pcl::PointCloud<PointType>::Ptr cloudMap(new pcl::PointCloud<PointType>());
 
         mapgenerator.getPointClouds(cloudMap, cloudCurr);
         cloudPublisher.publish(erasor_utils::cloud2msg(*cloudCurr));

@@ -29,7 +29,7 @@ struct Bin {
     double status;
     bool   is_occupied;
 
-    pcl::PointCloud<pcl::PointXYZI> points;
+    pcl::PointCloud<PointType> points;
 };
 
 struct DynamicBinIdx {
@@ -107,24 +107,24 @@ public:
 
     // Inputs: transformed & cut pcs
     void set_inputs(
-            const pcl::PointCloud<pcl::PointXYZI> &map_voi,
-            const pcl::PointCloud<pcl::PointXYZI> &query_voi);
+            const pcl::PointCloud<PointType> &map_voi,
+            const pcl::PointCloud<PointType> &query_voi);
 
     void compare_then_select(int frame);
 
     void get_pcs(
-            pcl::PointCloud<pcl::PointXYZI> &arranged,
-            pcl::PointCloud<pcl::PointXYZI> &complement);
+            pcl::PointCloud<PointType> &arranged,
+            pcl::PointCloud<PointType> &complement);
 
     // -------------------------------
     // Version 2 algorithm!
     void compare_vois_and_revert_ground(int frame);
 
     void get_static_estimate(
-            pcl::PointCloud<pcl::PointXYZI> &arranged,
-            pcl::PointCloud<pcl::PointXYZI> &complement);
+            pcl::PointCloud<PointType> &arranged,
+            pcl::PointCloud<PointType> &complement);
 
-    pcl::PointCloud<pcl::PointXYZI> ground_viz; // Visualized in pcs_v2!
+    pcl::PointCloud<PointType> ground_viz; // Visualized in pcs_v2!
     // -------------------------------
     // Version 3 algorithm!
     void compare_vois_and_revert_ground_w_block(int frame);
@@ -133,12 +133,12 @@ public:
 
     // -------------------------------
     void get_outliers(
-            pcl::PointCloud<pcl::PointXYZI> &map_rejected,
-            pcl::PointCloud<pcl::PointXYZI> &curr_rejected);
+            pcl::PointCloud<PointType> &map_rejected,
+            pcl::PointCloud<PointType> &curr_rejected);
 
-    pcl::PointCloud<pcl::PointXYZI> debug_curr_rejected;
-    pcl::PointCloud<pcl::PointXYZI> debug_map_rejected;
-    pcl::PointCloud<pcl::PointXYZI> map_complement;
+    pcl::PointCloud<PointType> debug_curr_rejected;
+    pcl::PointCloud<PointType> debug_map_rejected;
+    pcl::PointCloud<PointType> map_complement;
 
     R_POD r_pod_map; // R_POD of Map
     R_POD r_pod_curr; // R_POD of current pointcloud
@@ -180,18 +180,18 @@ private:
 
     void clear_bin(Bin &bin);
 
-    void clear(pcl::PointCloud<pcl::PointXYZI> &pt_cloud);
+    void clear(pcl::PointCloud<PointType> &pt_cloud);
 
-    pcl::PointCloud<pcl::PointXYZI> piecewise_ground_, non_ground_;
-    pcl::PointCloud<pcl::PointXYZI> ground_pc_, non_ground_pc_;
+    pcl::PointCloud<PointType> piecewise_ground_, non_ground_;
+    pcl::PointCloud<PointType> ground_pc_, non_ground_pc_;
 
-    void pt2r_pod(const pcl::PointXYZI &pt, Bin &bin);
+    void pt2r_pod(const PointType &pt, Bin &bin);
 
-    void voi2r_pod(const pcl::PointCloud<pcl::PointXYZI> &src, R_POD &r_pod);
+    void voi2r_pod(const pcl::PointCloud<PointType> &src, R_POD &r_pod);
 
     void voi2r_pod(
-            const pcl::PointCloud<pcl::PointXYZI> &src, R_POD &r_pod,
-            pcl::PointCloud<pcl::PointXYZI> &complement);
+            const pcl::PointCloud<PointType> &src, R_POD &r_pod,
+            pcl::PointCloud<PointType> &complement);
 
     void viz_pseudo_occupancy();
 
@@ -205,23 +205,23 @@ private:
     Eigen::MatrixXf normal_;
     double          th_dist_d_, d_;
 
-    void estimate_plane_(const pcl::PointCloud<pcl::PointXYZI> &ground);
+    void estimate_plane_(const pcl::PointCloud<PointType> &ground);
 
     void extract_initial_seeds_(
-            const pcl::PointCloud<pcl::PointXYZI> &p_sorted,
-            pcl::PointCloud<pcl::PointXYZI> &init_seeds);
+            const pcl::PointCloud<PointType> &p_sorted,
+            pcl::PointCloud<PointType> &init_seeds);
 
     void extract_ground(
-            const pcl::PointCloud<pcl::PointXYZI> &src,
-            pcl::PointCloud<pcl::PointXYZI> &dst,
-            pcl::PointCloud<pcl::PointXYZI> &outliers);
+            const pcl::PointCloud<PointType> &src,
+            pcl::PointCloud<PointType> &dst,
+            pcl::PointCloud<PointType> &outliers);
 
 
     bool has_dynamic(Bin &bin);
 
     void merge_bins(const Bin &src1, const Bin &src2, Bin &dst);
 
-    void r_pod2pc(const R_POD &sc, pcl::PointCloud<pcl::PointXYZI> &pc);
+    void r_pod2pc(const R_POD &sc, pcl::PointCloud<PointType> &pc);
 
 
     geometry_msgs::PolygonStamped set_polygons(int r_idx, int theta_idx, int num_split = 3);

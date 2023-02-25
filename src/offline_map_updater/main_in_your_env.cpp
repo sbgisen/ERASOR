@@ -13,7 +13,7 @@ float VOXEL_SIZE;
 bool STOP_FOR_EACH_FRAME;
 std::string filename = "/staticmap_via_erasor.pcd";
 
-using PointType = pcl::PointXYZI;
+//using PointType = pcl::PointXYZI;
 
 
 vector<float> split_line(string input, char delimiter) {

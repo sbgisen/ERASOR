@@ -1,5 +1,6 @@
 #ifndef ERASOR_UTILS_H
 #define ERASOR_UTILS_H
+#define PCL_NO_PRECOMPILE
 
 #include <cstdlib>
 #include <ctime>
@@ -46,6 +47,19 @@
 #include <std_msgs/Int32.h>
 #include "signal.h"
 
+struct EIGEN_ALIGN16 PointXYZRGBI
+{
+    PCL_ADD_POINT4D
+    PCL_ADD_RGB;
+    PCL_ADD_INTENSITY;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZRGBI, 
+                                  (float, x, x)(float, y, y)(float, z, z)
+                                  (float, rgb, rgb)
+                                  (float, intensity, intensity))
+
+using PointType = PointXYZRGBI;
 
 namespace erasor_utils {
     template<typename T>
@@ -97,12 +111,12 @@ namespace erasor_utils {
     Eigen::Matrix4f geoPose2eigen(geometry_msgs::Pose geoPose);
 
     void parse_dynamic_obj(
-            const pcl::PointCloud<pcl::PointXYZI> &cloudIn, pcl::PointCloud<pcl::PointXYZI> &dynamicOut,
-            pcl::PointCloud<pcl::PointXYZI> &staticOut);
+            const pcl::PointCloud<PointType> &cloudIn, pcl::PointCloud<PointType> &dynamicOut,
+            pcl::PointCloud<PointType> &staticOut);
 
-    void voxelize_preserving_labels(pcl::PointCloud<pcl::PointXYZI>::Ptr src, pcl::PointCloud<pcl::PointXYZI> &dst, double leaf_size);
+    void voxelize_preserving_labels(pcl::PointCloud<PointType>::Ptr src, pcl::PointCloud<PointType> &dst, double leaf_size);
 
-    void count_stat_dyn(const pcl::PointCloud<pcl::PointXYZI> &cloudIn, int &num_static, int &num_dynamic);
+    void count_stat_dyn(const pcl::PointCloud<PointType> &cloudIn, int &num_static, int &num_dynamic);
 
     void signal_callback_handler(int signum);
 

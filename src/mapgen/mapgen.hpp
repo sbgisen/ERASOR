@@ -29,12 +29,12 @@ private:
     int                             count       = 0;
     int                             accum_count = 0;
     int                             interval, last_ts, init_ts;
-    pcl::PointCloud<pcl::PointXYZI> cloud_curr;
-    pcl::PointCloud<pcl::PointXYZI> cloud_map;
+    pcl::PointCloud<PointType> cloud_curr;
+    pcl::PointCloud<PointType> cloud_map;
 
     // For large-scale map building
     // ROS can publish point cloud whose volume is under the 1 GB
-    std::vector<pcl::PointCloud<pcl::PointXYZI> > cloud_maps;
+    std::vector<pcl::PointCloud<PointType> > cloud_maps;
 
     nav_msgs::Path odom_path;
     float          leafsize;
@@ -51,7 +51,7 @@ private:
     std::vector<int>                     moving_dynamic_ids;
 
     // In summary, static: {not_moving_object_candidates} - {dynamic_objects}
-    void check_movement(const pcl::PointCloud<pcl::PointXYZI> &cloud) {
+    void check_movement(const pcl::PointCloud<PointType> &cloud) {
         std::map<int, Cluster> clusters_tmp; // <id, Cluster>
         // 1. points to <id, centroid>
         for (const auto        &pt: cloud.points) {
@@ -213,10 +213,10 @@ public:
                 0, 0, 1, 1.73,
                 0, 0, 0, 1;
 
-        pcl::PointCloud<pcl::PointXYZI> cloud = erasor_utils::cloudmsg2cloud<pcl::PointXYZI>(data.lidar);
+        pcl::PointCloud<PointType> cloud = erasor_utils::cloudmsg2cloud<PointType>(data.lidar);
 
         // To remove some noisy points in the vicinity of the vehicles
-        pcl::PointCloud<pcl::PointXYZI> inliers, outliers; // w.r.t origin
+        pcl::PointCloud<PointType> inliers, outliers; // w.r.t origin
         float                           max_dist_square = pow(CAR_BODY_SIZE, 2);
         for (auto const                 &pt : cloud.points) {
             double dist_square = pow(pt.x, 2) + pow(pt.y, 2);
@@ -228,12 +228,12 @@ public:
         }
         cloud = outliers;
 
-        pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_transformed(new pcl::PointCloud<pcl::PointXYZI>);
+        pcl::PointCloud<PointType>::Ptr ptr_transformed(new pcl::PointCloud<PointType>);
         pcl::transformPointCloud(cloud, *ptr_transformed, tf_lidar2origin);
 
         Eigen::Matrix4f pose = erasor_utils::geoPose2eigen(data.odom);
         std::cout << std::setprecision(3) << std::left << setw(nameWidth) << setfill(separator) << "=> [Pose] " << pose(0, 3) << ", " << pose(1, 3) << ", " << pose(2, 3) << std::endl;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr world_transformed(new pcl::PointCloud<pcl::PointXYZI>);
+        pcl::PointCloud<PointType>::Ptr world_transformed(new pcl::PointCloud<PointType>);
         pcl::transformPointCloud(*ptr_transformed, *world_transformed, pose);
 
         erasor_utils::voxelize_preserving_labels(world_transformed, cloud_curr, 0.2);
@@ -247,7 +247,7 @@ public:
             if (is_large_scale) {
                 static int cnt_voxel = 0;
                 if (cnt_voxel++ % 500 == 0){
-                    pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_map(new pcl::PointCloud<pcl::PointXYZI>);
+                    pcl::PointCloud<PointType>::Ptr ptr_map(new pcl::PointCloud<PointType>);
                     *ptr_map = cloud_map;
                     std::cout << "\033[1;32m Voxelizing submap...\033[0m" << std::endl;
                     erasor_utils::voxelize_preserving_labels(ptr_map, cloud_map, leafsize);
@@ -261,14 +261,14 @@ public:
         }
 
     }
-    void getPointClouds(pcl::PointCloud<pcl::PointXYZI>::Ptr map_out,
-                        pcl::PointCloud<pcl::PointXYZI>::Ptr curr_out){
+    void getPointClouds(pcl::PointCloud<PointType>::Ptr map_out,
+                        pcl::PointCloud<PointType>::Ptr curr_out){
         *map_out  = cloud_map;
         *curr_out = cloud_curr;
     }
 
     void saveNaiveMap(const std::string& original_dir, const std::string& map_dir){
-        pcl::PointCloud<pcl::PointXYZI> cloud_src;
+        pcl::PointCloud<PointType> cloud_src;
 
         std::cout << "\033[1;32m On saving map cloud...it may take few seconds...\033[0m" << std::endl;
         if (is_large_scale){
@@ -284,8 +284,8 @@ public:
 
         pcl::io::savePCDFileASCII(original_dir, cloud_src);
 
-        pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_map(new pcl::PointCloud<pcl::PointXYZI>);
-        pcl::PointCloud<pcl::PointXYZI> cloud_out;
+        pcl::PointCloud<PointType>::Ptr ptr_map(new pcl::PointCloud<PointType>);
+        pcl::PointCloud<PointType> cloud_out;
         ptr_map->points.reserve(cloud_src.points.size());
 
         std::cout << "\033[1;32m Start to copy pts...\033[0m" << std::endl;

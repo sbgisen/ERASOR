@@ -35,29 +35,29 @@ OfflineMapUpdater::~OfflineMapUpdater() {
 }
 
 void OfflineMapUpdater::initialize_ptrs() {
-    map_init_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_arranged_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_arranged_init_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_arranged_global_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_arranged_complement_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_ceilings_.reset(new pcl::PointCloud<pcl::PointXYZI>());
+    map_init_.reset(new pcl::PointCloud<PointType>());
+    map_arranged_.reset(new pcl::PointCloud<PointType>());
+    map_arranged_init_.reset(new pcl::PointCloud<PointType>());
+    map_arranged_global_.reset(new pcl::PointCloud<PointType>());
+    map_arranged_complement_.reset(new pcl::PointCloud<PointType>());
+    map_ceilings_.reset(new pcl::PointCloud<PointType>());
 
-    query_voi_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_voi_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_voi_wrt_origin_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_outskirts_.reset(new pcl::PointCloud<pcl::PointXYZI>());
+    query_voi_.reset(new pcl::PointCloud<PointType>());
+    map_voi_.reset(new pcl::PointCloud<PointType>());
+    map_voi_wrt_origin_.reset(new pcl::PointCloud<PointType>());
+    map_outskirts_.reset(new pcl::PointCloud<PointType>());
 
-    map_static_estimate_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_egocentric_complement_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_filtered_.reset(new pcl::PointCloud<pcl::PointXYZI>());
+    map_static_estimate_.reset(new pcl::PointCloud<PointType>());
+    map_egocentric_complement_.reset(new pcl::PointCloud<PointType>());
+    map_filtered_.reset(new pcl::PointCloud<PointType>());
 
-    query_rejected_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    map_rejected_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    total_query_rejected_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    total_map_rejected_.reset(new pcl::PointCloud<pcl::PointXYZI>());
+    query_rejected_.reset(new pcl::PointCloud<PointType>());
+    map_rejected_.reset(new pcl::PointCloud<PointType>());
+    total_query_rejected_.reset(new pcl::PointCloud<PointType>());
+    total_map_rejected_.reset(new pcl::PointCloud<PointType>());
 
-    dynamic_objs_to_viz_.reset(new pcl::PointCloud<pcl::PointXYZI>());
-    static_objs_to_viz_.reset(new pcl::PointCloud<pcl::PointXYZI>());
+    dynamic_objs_to_viz_.reset(new pcl::PointCloud<PointType>());
+    static_objs_to_viz_.reset(new pcl::PointCloud<PointType>());
 }
 
 void OfflineMapUpdater::set_params() {
@@ -144,10 +144,10 @@ void OfflineMapUpdater::load_global_map() {
 
     } else if (environment_ == "indoor") {
         // Erase the rooftop in case of indoor environments
-        pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_dst(new pcl::PointCloud<pcl::PointXYZI>);
+        pcl::PointCloud<PointType>::Ptr ptr_dst(new pcl::PointCloud<PointType>);
         // ToDo It may not work on the large-scale map or env which includes slope regions
         throw invalid_argument("This `indoor` mode is not perfect!");
-        pcl::PassThrough<pcl::PointXYZI> ptfilter;
+        pcl::PassThrough<PointType> ptfilter;
         ptfilter.setInputCloud(map_init_);
         ptfilter.setFilterFieldName("z");
         ptfilter.setFilterLimits(min_h_, max_h_);
@@ -173,7 +173,7 @@ void OfflineMapUpdater::callback_flag(const std_msgs::Float32::ConstPtr &msg) {
 
 void OfflineMapUpdater::save_static_map(float voxel_size) {
     // 1. Voxelization
-    pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_src(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<PointType>::Ptr ptr_src(new pcl::PointCloud<PointType>);
     ptr_src->reserve(num_pcs_init_);
 
     if (is_large_scale_) {
@@ -182,7 +182,7 @@ void OfflineMapUpdater::save_static_map(float voxel_size) {
     } else {
         *ptr_src = *map_arranged_;
     }
-    pcl::PointCloud<pcl::PointXYZI> map_to_be_saved;
+    pcl::PointCloud<PointType> map_to_be_saved;
     erasor_utils::voxelize_preserving_labels(ptr_src, map_to_be_saved, voxel_size); // 0.05m is the criteria!
     // 2. Save the cloudmap
     map_to_be_saved.width  = map_to_be_saved.points.size();
@@ -224,10 +224,10 @@ void OfflineMapUpdater::callback_node(const erasor::node::ConstPtr &msg) {
          *    Note that query is on lidar frame.
          *    So the coordinate is tranformed from lidar coord. to body coord. (in fact, it depends on your own env.)
          * */
-        pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_query(new pcl::PointCloud<pcl::PointXYZI>);
-        pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_query_voxel(new pcl::PointCloud<pcl::PointXYZI>);
-        pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_query_body(new pcl::PointCloud<pcl::PointXYZI>);
-        pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_query_viz(new pcl::PointCloud<pcl::PointXYZI>);
+        pcl::PointCloud<PointType>::Ptr ptr_query(new pcl::PointCloud<PointType>);
+        pcl::PointCloud<PointType>::Ptr ptr_query_voxel(new pcl::PointCloud<PointType>);
+        pcl::PointCloud<PointType>::Ptr ptr_query_body(new pcl::PointCloud<PointType>);
+        pcl::PointCloud<PointType>::Ptr ptr_query_viz(new pcl::PointCloud<PointType>);
 
         ptr_query->reserve(NUM_PTS_LARGE_ENOUGH);
         ptr_query_voxel->reserve(NUM_PTS_LARGE_ENOUGH);
@@ -298,7 +298,7 @@ void OfflineMapUpdater::callback_node(const erasor::node::ConstPtr &msg) {
         *total_query_rejected_ += *query_rejected_;
 
 //        if (stack_count % global_voxelization_period_ == 0) { // 1 indicates init voxelization
-//            pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_src(new pcl::PointCloud<pcl::PointXYZI>);
+//            pcl::PointCloud<PointType>::Ptr ptr_src(new pcl::PointCloud<PointType>);
 //            *ptr_src = *map_arranged_;
 //            auto num_origin  = map_arranged_->points.size();
 //            auto start_voxel = ros::Time::now().toSec();
@@ -344,7 +344,7 @@ void OfflineMapUpdater::reassign_submap(double pose_x, double pose_y){
         static double half_size = submap_size_ / 2.0;
         if ( (diff_x > half_size) ||  (diff_y > half_size) ) {
             // Reassign submap
-            map_arranged_global_.reset(new pcl::PointCloud<pcl::PointXYZI>());
+            map_arranged_global_.reset(new pcl::PointCloud<PointType>());
             map_arranged_global_->reserve(num_pcs_init_);
             *map_arranged_global_ = *map_arranged_ + *map_arranged_complement_;
 
@@ -358,8 +358,8 @@ void OfflineMapUpdater::reassign_submap(double pose_x, double pose_y){
 }
 
 void OfflineMapUpdater::set_submap(
-        const pcl::PointCloud<pcl::PointXYZI> &map_global, pcl::PointCloud<pcl::PointXYZI>& submap,
-        pcl::PointCloud<pcl::PointXYZI>& submap_complement,
+        const pcl::PointCloud<PointType> &map_global, pcl::PointCloud<PointType>& submap,
+        pcl::PointCloud<PointType>& submap_complement,
         double x, double y, double submap_size) {
 
     submap.clear();
@@ -379,8 +379,8 @@ void OfflineMapUpdater::set_submap(
 }
 
 void OfflineMapUpdater::fetch_VoI(
-        double x_criterion, double y_criterion, pcl::PointCloud<pcl::PointXYZI> &dst,
-        pcl::PointCloud<pcl::PointXYZI> &outskirts, std::string mode) {
+        double x_criterion, double y_criterion, pcl::PointCloud<PointType> &dst,
+        pcl::PointCloud<PointType> &outskirts, std::string mode) {
     // 1. Divide map_arranged into map_central and map_outskirts
     static double margin = 0;
     if (!dst.empty()) dst.clear();
@@ -399,15 +399,15 @@ void OfflineMapUpdater::fetch_VoI(
             }
         }
     } else if (mode == "kdtree") {
-        pcl::PointXYZI searchPoint;
+        PointType searchPoint;
         searchPoint.x = x_criterion;
         searchPoint.x = y_criterion;
         searchPoint.z = 0.5;
         std::cout << "\033[1;32mKDTREE mode " << (*map_arranged_).points.size() << "\033[0m" << std::endl;
         std::vector<int>                     pointIdxRadiusSearch;
         std::vector<float>                   pointRadiusSquaredDistance;
-        pcl::KdTreeFLANN<pcl::PointXYZI>     kdtree;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>);
+        pcl::KdTreeFLANN<PointType>     kdtree;
+        pcl::PointCloud<PointType>::Ptr cloud(new pcl::PointCloud<PointType>);
         *cloud = *map_arranged_;
         kdtree.setInputCloud(cloud);
 
@@ -432,17 +432,17 @@ void OfflineMapUpdater::fetch_VoI(
                                                  << map_voi_wrt_origin_->points.size() << " + \033[4;32m" << outskirts.points.size()
                                                  << "\033[0m");
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_transformed(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<PointType>::Ptr ptr_transformed(new pcl::PointCloud<PointType>);
     pcl::transformPointCloud(*map_voi_wrt_origin_, *ptr_transformed, tf_body2origin_.inverse());
     dst = *ptr_transformed;
 }
 
 
 void OfflineMapUpdater::body2origin(
-        const pcl::PointCloud<pcl::PointXYZI> src,
-        pcl::PointCloud<pcl::PointXYZI> &dst) {
-    pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_src(new pcl::PointCloud<pcl::PointXYZI>);
-    pcl::PointCloud<pcl::PointXYZI>::Ptr ptr_transformed(new pcl::PointCloud<pcl::PointXYZI>);
+        const pcl::PointCloud<PointType> src,
+        pcl::PointCloud<PointType> &dst) {
+    pcl::PointCloud<PointType>::Ptr ptr_src(new pcl::PointCloud<PointType>);
+    pcl::PointCloud<PointType>::Ptr ptr_transformed(new pcl::PointCloud<PointType>);
     *ptr_src = src;
     pcl::transformPointCloud(*ptr_src, *ptr_transformed, tf_body2origin_);
     dst = *ptr_transformed;
@@ -485,7 +485,7 @@ void OfflineMapUpdater::publish(
 }
 
 void OfflineMapUpdater::publish(
-        const pcl::PointCloud<pcl::PointXYZI> &map,
+        const pcl::PointCloud<PointType> &map,
         const ros::Publisher &publisher) {
     pcl::toROSMsg(map, pc2_map_);
     pc2_map_.header.frame_id = "map";

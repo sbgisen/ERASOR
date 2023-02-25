@@ -20,7 +20,7 @@ double ERASOR::xy2radius(const double &x, const double &y) {
     return sqrt(pow(x, 2) + pow(y, 2));
 }
 
-void ERASOR::clear(pcl::PointCloud<pcl::PointXYZI> &pt_cloud) {
+void ERASOR::clear(pcl::PointCloud<PointType> &pt_cloud) {
     if (!pt_cloud.empty()) {
         pt_cloud.clear();
     }
@@ -55,8 +55,8 @@ void ERASOR::clear_bin(Bin &bin) {
  * @brief Inputs should be the transformed pointcloud!
  */
 void ERASOR::set_inputs(
-        const pcl::PointCloud<pcl::PointXYZI> &map_voi,
-        const pcl::PointCloud<pcl::PointXYZI> &query_voi) {
+        const pcl::PointCloud<PointType> &map_voi,
+        const pcl::PointCloud<PointType> &query_voi) {
 
     clear(debug_curr_rejected);
     clear(debug_map_rejected);
@@ -84,7 +84,7 @@ void ERASOR::set_inputs(
 
 }
 
-void ERASOR::pt2r_pod(const pcl::PointXYZI &pt, Bin &bin) {
+void ERASOR::pt2r_pod(const PointType &pt, Bin &bin) {
     bin.is_occupied = true;
     bin.points.push_back(pt);
     if (pt.z >= bin.max_h) {
@@ -98,7 +98,7 @@ void ERASOR::pt2r_pod(const pcl::PointXYZI &pt, Bin &bin) {
 }
 
 void ERASOR::voi2r_pod(
-        const pcl::PointCloud<pcl::PointXYZI> &src,
+        const pcl::PointCloud<PointType> &src,
         R_POD &r_pod) {
     for (auto const &pt : src.points) {
         if (pt.z < max_h && pt.z > min_h) {
@@ -115,15 +115,15 @@ void ERASOR::voi2r_pod(
     }
 
     // For debugging
-    pcl::PointCloud<pcl::PointXYZI> curr_init;
+    pcl::PointCloud<PointType> curr_init;
     r_pod2pc(r_pod, curr_init);
     sensor_msgs::PointCloud2 pc2_curr_init = erasor_utils::cloud2msg(curr_init);
     pub_curr_init.publish(pc2_curr_init);
 }
 
 void ERASOR::voi2r_pod(
-        const pcl::PointCloud<pcl::PointXYZI> &src,
-        R_POD &r_pod, pcl::PointCloud<pcl::PointXYZI> &complement) {
+        const pcl::PointCloud<PointType> &src,
+        R_POD &r_pod, pcl::PointCloud<PointType> &complement) {
     for (auto const                 &pt : src.points) {
         if (pt.z < max_h && pt.z > min_h) { // range of z?
             double r = xy2radius(pt.x, pt.y);
@@ -137,7 +137,7 @@ void ERASOR::voi2r_pod(
             } else { complement.points.push_back(pt); }
         } else { complement.points.push_back(pt); }
     }
-    pcl::PointCloud<pcl::PointXYZI> map_init;
+    pcl::PointCloud<PointType> map_init;
     r_pod2pc(r_pod, map_init);
     sensor_msgs::PointCloud2 pc2_map_init = erasor_utils::cloud2msg(map_init);
     pub_map_init.publish(pc2_map_init);
@@ -180,7 +180,7 @@ void ERASOR::viz_pseudo_occupancy() {
 }
 
 
-void ERASOR::estimate_plane_(const pcl::PointCloud<pcl::PointXYZI> &ground) {
+void ERASOR::estimate_plane_(const pcl::PointCloud<PointType> &ground) {
     Eigen::Matrix3f cov;
     Eigen::Vector4f pc_mean;
     pcl::computeMeanAndCovarianceMatrix(ground, cov, pc_mean);
@@ -197,15 +197,15 @@ void ERASOR::estimate_plane_(const pcl::PointCloud<pcl::PointXYZI> &ground) {
     th_dist_d_ = th_dist_ - d_;
 }
 
-bool point_cmp(pcl::PointXYZI a, pcl::PointXYZI b) {
+bool point_cmp(PointType a, PointType b) {
     return a.z < b.z;
 }
 
 void ERASOR::extract_initial_seeds_(
-        const pcl::PointCloud<pcl::PointXYZI> &p_sorted,
-        pcl::PointCloud<pcl::PointXYZI> &init_seeds) {
+        const pcl::PointCloud<PointType> &p_sorted,
+        pcl::PointCloud<PointType> &init_seeds) {
     init_seeds.points.clear();
-    pcl::PointCloud<pcl::PointXYZI> g_seeds_pc;
+    pcl::PointCloud<PointType> g_seeds_pc;
 
     // LPR is the mean of low point representative
     double sum = 0;
@@ -231,8 +231,8 @@ void ERASOR::extract_initial_seeds_(
 }
 
 void ERASOR::extract_ground(
-        const pcl::PointCloud<pcl::PointXYZI> &src,
-        pcl::PointCloud<pcl::PointXYZI> &dst, pcl::PointCloud<pcl::PointXYZI> &outliers) {
+        const pcl::PointCloud<PointType> &src,
+        pcl::PointCloud<PointType> &dst, pcl::PointCloud<PointType> &outliers) {
     if (!dst.empty()) dst.clear();
     if (!outliers.empty()) outliers.clear();
 
@@ -306,7 +306,7 @@ void ERASOR::merge_bins(const Bin &src1, const Bin &src2, Bin &dst) {
     }
 }
 
-void ERASOR::r_pod2pc(const R_POD &sc, pcl::PointCloud<pcl::PointXYZI> &pc) {
+void ERASOR::r_pod2pc(const R_POD &sc, pcl::PointCloud<PointType> &pc) {
     pc.points.clear();
     for (int theta = 0; theta < num_sectors; theta++) {
         for (int r = 0; r < num_rings; r++) {
@@ -320,8 +320,8 @@ void ERASOR::r_pod2pc(const R_POD &sc, pcl::PointCloud<pcl::PointXYZI> &pc) {
 }
 
 void ERASOR::get_outliers(
-        pcl::PointCloud<pcl::PointXYZI> &map_rejected,
-        pcl::PointCloud<pcl::PointXYZI> &curr_rejected) {
+        pcl::PointCloud<PointType> &map_rejected,
+        pcl::PointCloud<PointType> &curr_rejected) {
     map_rejected  = debug_map_rejected;
     curr_rejected = debug_curr_rejected;
 }
@@ -485,7 +485,7 @@ void ERASOR::compare_vois_and_revert_ground_w_block(int frame) {
 //    out_map<<"\n";  out_curr<<"\n";
     }
 
-//  pcl::PointCloud<pcl::PointXYZI> origin_total, ground_total, dummy_non_ground;
+//  pcl::PointCloud<PointType> origin_total, ground_total, dummy_non_ground;
     int num_origin_stat, num_origin_dyn;
     int num_ground_stat, num_ground_dyn;
 
@@ -523,7 +523,7 @@ void ERASOR::compare_vois_and_revert_ground_w_block(int frame) {
                     r_pod_selected[r][theta].points += piecewise_ground_;
 
                     /*** Thus, voxelization is conducted */
-                    pcl::PointCloud<pcl::PointXYZI>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZI>);
+                    pcl::PointCloud<PointType>::Ptr tmp(new pcl::PointCloud<PointType>);
                     *tmp = r_pod_selected[r][theta].points;
                     erasor_utils::voxelize_preserving_labels(tmp, r_pod_selected[r][theta].points, map_voxel_size_);
 
@@ -610,8 +610,8 @@ bool ERASOR::has_dynamic(Bin &bin) {
 
 
 void ERASOR::get_static_estimate(
-        pcl::PointCloud<pcl::PointXYZI> &arranged,
-        pcl::PointCloud<pcl::PointXYZI> &complement) {
+        pcl::PointCloud<PointType> &arranged,
+        pcl::PointCloud<PointType> &complement) {
     r_pod2pc(r_pod_selected, arranged);
     arranged += ground_viz;
     if(ground_viz.size() != 0){

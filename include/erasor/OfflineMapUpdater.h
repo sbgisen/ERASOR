@@ -64,33 +64,33 @@ namespace erasor {
         /***
          * Variables ralted with global map
          */
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_init_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_arranged_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_arranged_init_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_arranged_global_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_arranged_complement_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_ceilings_;
+        pcl::PointCloud<PointType>::Ptr map_init_;
+        pcl::PointCloud<PointType>::Ptr map_arranged_;
+        pcl::PointCloud<PointType>::Ptr map_arranged_init_;
+        pcl::PointCloud<PointType>::Ptr map_arranged_global_;
+        pcl::PointCloud<PointType>::Ptr map_arranged_complement_;
+        pcl::PointCloud<PointType>::Ptr map_ceilings_;
 
         /*** Inputs of ERASOR */
-        pcl::PointCloud<pcl::PointXYZI>::Ptr query_voi_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_voi_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_voi_wrt_origin_; // w.r.t origin, i.e. map frame
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_outskirts_;
+        pcl::PointCloud<PointType>::Ptr query_voi_;
+        pcl::PointCloud<PointType>::Ptr map_voi_;
+        pcl::PointCloud<PointType>::Ptr map_voi_wrt_origin_; // w.r.t origin, i.e. map frame
+        pcl::PointCloud<PointType>::Ptr map_outskirts_;
 
         /*** Outputs of ERASOR
          * map_filtered_ = map_static_estimate + map_egocentric_complement
          */
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_static_estimate_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_egocentric_complement_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_filtered_;
+        pcl::PointCloud<PointType>::Ptr map_static_estimate_;
+        pcl::PointCloud<PointType>::Ptr map_egocentric_complement_;
+        pcl::PointCloud<PointType>::Ptr map_filtered_;
 
-        pcl::PointCloud<pcl::PointXYZI>::Ptr query_rejected_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr map_rejected_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr total_query_rejected_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr total_map_rejected_;
+        pcl::PointCloud<PointType>::Ptr query_rejected_;
+        pcl::PointCloud<PointType>::Ptr map_rejected_;
+        pcl::PointCloud<PointType>::Ptr total_query_rejected_;
+        pcl::PointCloud<PointType>::Ptr total_map_rejected_;
 
-        pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_objs_to_viz_;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr static_objs_to_viz_;
+        pcl::PointCloud<PointType>::Ptr dynamic_objs_to_viz_;
+        pcl::PointCloud<PointType>::Ptr static_objs_to_viz_;
 
         // Published msgs
         sensor_msgs::PointCloud2 pc2_map_;
@@ -111,20 +111,20 @@ namespace erasor {
         void callback_flag(const std_msgs::Float32::ConstPtr &msg);
 
         void body2origin(
-                const pcl::PointCloud<pcl::PointXYZI> src,
-                pcl::PointCloud<pcl::PointXYZI> &dst);
+                const pcl::PointCloud<PointType> src,
+                pcl::PointCloud<PointType> &dst);
 
         void reassign_submap(double pose_x, double pose_y);
 
         void set_submap(
-                const pcl::PointCloud<pcl::PointXYZI> &map_global,
-                pcl::PointCloud<pcl::PointXYZI>& submap,
-                pcl::PointCloud<pcl::PointXYZI>& submap_complement,
+                const pcl::PointCloud<PointType> &map_global,
+                pcl::PointCloud<PointType>& submap,
+                pcl::PointCloud<PointType>& submap_complement,
                 double x, double y, double submap_size);
 
         void fetch_VoI(
                 double x_criterion, double y_criterion,
-                pcl::PointCloud<pcl::PointXYZI> &dst, pcl::PointCloud<pcl::PointXYZI> &outskirts,
+                pcl::PointCloud<PointType> &dst, pcl::PointCloud<PointType> &outskirts,
                 std::string mode = "naive");
 
         void print_status();
@@ -138,7 +138,7 @@ namespace erasor {
                 const ros::Publisher &publisher);
 
         void publish(
-                const pcl::PointCloud<pcl::PointXYZI> &map,
+                const pcl::PointCloud<PointType> &map,
                 const ros::Publisher &publisher);
 
         geometry_msgs::Pose pose_curr;

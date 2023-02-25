@@ -41,32 +41,32 @@ int main(int argc, char **argv)
     ////////////////////////////////////////////////////////////////////
     std::cout<<"\033[1;32mLoading map..."<<std::endl;
     // load original src
-    pcl::PointCloud<pcl::PointXYZI>::Ptr ptrSrc(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<PointType>::Ptr ptrSrc(new pcl::PointCloud<PointType>);
     erasor_utils::load_pcd(rawName, ptrSrc);
 
     // Removert
-    pcl::PointCloud<pcl::PointXYZI>::Ptr ptrOcto(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<PointType>::Ptr ptrOcto(new pcl::PointCloud<PointType>);
     erasor_utils::load_pcd(octoMapName, ptrOcto);
 
     // pplremover
-    pcl::PointCloud<pcl::PointXYZI>::Ptr ptrPpl(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<PointType>::Ptr ptrPpl(new pcl::PointCloud<PointType>);
     erasor_utils::load_pcd(pplName, ptrPpl);
 
     // Removert
-    pcl::PointCloud<pcl::PointXYZI>::Ptr ptrRemovert(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<PointType>::Ptr ptrRemovert(new pcl::PointCloud<PointType>);
     erasor_utils::load_pcd(removertName, ptrRemovert);
 
     // Erasor
-    pcl::PointCloud<pcl::PointXYZI>::Ptr ptrErasor(new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<PointType>::Ptr ptrErasor(new pcl::PointCloud<PointType>);
     erasor_utils::load_pcd(erasorName, ptrErasor);
     std::cout<<"\033[1;32mLoad complete \033[0m"<<std::endl;
 
     ////////////////////////////////////////////////////////////////////
-    pcl::PointCloud<pcl::PointXYZI> mapStatic, mapDynamic;
-    pcl::PointCloud<pcl::PointXYZI> octoStatic, octoDynamic;
-    pcl::PointCloud<pcl::PointXYZI> pplStatic, pplDynamic;
-    pcl::PointCloud<pcl::PointXYZI> removertStatic, removertDynamic;
-    pcl::PointCloud<pcl::PointXYZI> erasorStatic, erasorDynamic;
+    pcl::PointCloud<PointType> mapStatic, mapDynamic;
+    pcl::PointCloud<PointType> octoStatic, octoDynamic;
+    pcl::PointCloud<PointType> pplStatic, pplDynamic;
+    pcl::PointCloud<PointType> removertStatic, removertDynamic;
+    pcl::PointCloud<PointType> erasorStatic, erasorDynamic;
 
     erasor_utils::parse_dynamic_obj(*ptrErasor, erasorDynamic, erasorStatic);
     erasor_utils::parse_dynamic_obj(*ptrRemovert, removertDynamic, removertStatic);
