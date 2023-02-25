@@ -80,6 +80,8 @@ void OfflineMapUpdater::set_params() {
     nh.param("/erasor/min_h", min_h_, 0.0);
     nh.param("/erasor/version", erasor_version_, 3);
 
+    nh.param("/erasor/use_rgb", use_rgb_, false);
+
     nh.param("/verbose", verbose_, true);
     std::cout << "Loading " << map_name_ << endl;
     std::cout << "Target env: " << environment_ << std::endl;
@@ -171,6 +173,25 @@ void OfflineMapUpdater::callback_flag(const std_msgs::Float32::ConstPtr &msg) {
     save_static_map(msg->data);
 }
 
+void savePCDwithoutRGBASCII(std::string file_name, pcl::PointCloud<PointType> cloud)
+{
+    pcl::PointCloud<pcl::PointXYZI>::Ptr save_cloud(new pcl::PointCloud<pcl::PointXYZI>());
+
+    int cloudSize = cloud.size();
+    save_cloud->resize(cloudSize);
+
+    for (int i = 0; i < cloudSize; ++i)
+    {
+        const auto& pointFrom = cloud.points[i];
+        save_cloud->points[i].x = pointFrom.x;
+        save_cloud->points[i].y = pointFrom.y;
+        save_cloud->points[i].z = pointFrom.z;
+        save_cloud->points[i].intensity = pointFrom.intensity;
+    }
+
+    pcl::io::savePCDFileASCII(file_name, *save_cloud);
+}
+
 void OfflineMapUpdater::save_static_map(float voxel_size) {
     // 1. Voxelization
     pcl::PointCloud<PointType>::Ptr ptr_src(new pcl::PointCloud<PointType>);
@@ -190,7 +211,16 @@ void OfflineMapUpdater::save_static_map(float voxel_size) {
 
     std::cout << "\033[1;32mTARGET: " << save_path_ + "/" + data_name_ + "_result.pcd" << "\033[0m" << std::endl;
     std::cout << "Voxelization operated with " << voxel_size << " voxel size" << std::endl;
-    pcl::io::savePCDFileASCII(save_path_ + "/" + data_name_ + "_result.pcd", map_to_be_saved);
+
+    if(use_rgb_)
+    {
+        pcl::io::savePCDFileASCII(save_path_ + "/" + data_name_ + "_result.pcd", map_to_be_saved);
+    }
+    else
+    {
+        savePCDwithoutRGBASCII(save_path_ + "/" + data_name_ + "_result.pcd", map_to_be_saved);
+    }
+
     std::cout << "\033[1;32mComplete to save the final static map\033[0m" << std::endl;
 
 }

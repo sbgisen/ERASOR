@@ -18,6 +18,7 @@ namespace erasor {
         bool   verbose_;
         bool   is_large_scale_;
         bool   is_submap_not_initialized_ = true;
+        bool   use_rgb_;
 
         /**< Params. of Volume of Interest (VoI) */
         double max_range_;

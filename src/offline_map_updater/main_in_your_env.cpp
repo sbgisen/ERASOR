@@ -120,7 +120,7 @@ int main(int argc, char **argv)
         }
     }
 
-    updater.save_static_map(0.2);
+    updater.save_static_map(VOXEL_SIZE);
 
     cout<< "Static map building complete!" << endl;
 
